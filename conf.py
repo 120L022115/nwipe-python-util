@@ -1,0 +1,3 @@
+
+NWIPE_BIN_PATH = './nwipe'
+SUDO_PASSWD = "111111"
