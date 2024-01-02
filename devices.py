@@ -41,7 +41,7 @@ def virtual_device(path):
 
 
 class Device:
-    
+
     def __str__(d):
         text = ""
 
@@ -219,7 +219,7 @@ class Device:
                 self.removable = "No"
         except IOError:
             self.removable = "No"
-    
+
     def get_data_obj(self):
         doc = {
             "host": self.host,
@@ -309,15 +309,16 @@ def get_list() -> [Device]:
                 sysdir = os.path.join("/sys/block", path)
                 if virtual_device(sysdir) == 1:
                     continue
-            d = Device(pcidata, os.path.join("/sys/block", path), sysfs_no_links)
+            d = Device(pcidata, os.path.join(
+                "/sys/block", path), sysfs_no_links)
             devices.append(d)
     return devices
 
     for d in devices:
         print(d)
 
+
 __all__ = [get_list, Device, pretty_size]
 
 if __name__ == "__main__":
     print(get_list())
-    
