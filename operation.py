@@ -4,7 +4,7 @@ import os
 import subprocess
 import threading
 import signal
-from typing import Callable, Union
+from typing import Callable, Union, List
 from devices import Device
 from conf import NWIPE_BIN_PATH, SUDO_PASSWD
 
@@ -62,7 +62,7 @@ def __close_pipe_and_wait(process: subprocess.Popen, subthread: threading.Thread
     return process.returncode
 
 
-def __open_pipe_with_multi_process(command: [str], callback: Callable[[subprocess.Popen, str], None] = __callback__print) -> (subprocess.Popen, threading.Thread):
+def __open_pipe_with_multi_process(command: List[str], callback: Callable[[subprocess.Popen, str, int], None] = __callback__print) -> tuple[subprocess.Popen, threading.Thread]:
     if command == None:
         raise ValueError("command is None")
     print("运行：", " ".join(command))
@@ -196,8 +196,8 @@ def check_bin_exist() -> OperationResult:
     returncode = __close_pipe_and_wait(process, thread, True)
     return result
 
-
-def run_nwipe_with_command_line(command: [str], cmd_callback: Union[Callable[[subprocess.Popen, str, int], Union[OperationResult, None]], None] = None) -> OperationResult:
+type Cmd_Callback = Union[Callable[[subprocess.Popen, str, int], Union[OperationResult, None]], None]
+def run_nwipe_with_command_line(command: List[str], cmd_callback: Cmd_Callback = None) -> OperationResult:
     """
     运行nwipe命令行
 
@@ -312,7 +312,8 @@ def run_nwipe(
         rounds: int = 1,
         log_path: str = None,
         pdf_report_path: str = None,
-        prng_method: Union[PRNGOption.mersenne, PRNGOption.twister, PRNGOption.isaac, PRNGOption.isaac64] = None):
+        prng_method: Union[PRNGOption.mersenne, PRNGOption.twister, PRNGOption.isaac, PRNGOption.isaac64] = None,
+        cmd_callback: Cmd_Callback = None):
     cmd = ['--autonuke', '--nowait', '--nogui']
     if verify in [Verifies.off, Verifies.last, Verifies.all]:
         cmd.extend(['--verify', verify])
@@ -342,11 +343,11 @@ def run_nwipe(
     else:
         raise ValueError("device must be Device or str")
     print("运行nwipe命令：", cmd)
-    return run_nwipe_with_command_line(cmd)
+    return run_nwipe_with_command_line(cmd, cmd_callback)
 
 
 __all__ = [check_sudo_password, set_sudo_password, run_nwipe_with_command_line, check_bin_exist,
-           OperationResult, OperationFailedType, run_nwipe, Verifies, Methods, PRNGOption]
+           OperationResult, OperationFailedType, run_nwipe, Verifies, Methods, PRNGOption, Cmd_Callback]
 
 if __name__ == "__main__":
     print(check_sudo_password())
